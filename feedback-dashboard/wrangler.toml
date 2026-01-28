@@ -1,0 +1,16 @@
+name = "feedback-dashboard"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+account_id = "f9b5e5b5e64b4fabe5f271e2505d12ed"  # Keep your actual ID here
+workers_dev = true
+
+# Cloudflare KV (already have)
+kv_namespaces = [
+  { binding = "FEEDBACK_KV", id = "f7efbcbf7bbf464cbb8aa08cb005be5a", preview_id = "f7efbcbf7bbf464cbb8aa08cb005be5a" }
+]
+
+# Cloudflare D1 (new)
+[[d1_databases]]
+binding = "DB"
+database_name = "feedback-db"
+database_id = "dc6364ba-dc92-418c-84db-96c02396231c"  # Replace with ID from step 1

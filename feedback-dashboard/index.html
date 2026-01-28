@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .card h2 {
+            color: #444;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .feedback-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+            transition: transform 0.2s;
+        }
+        
+        .feedback-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .feedback-item.positive {
+            border-left-color: #10b981;
+        }
+        
+        .feedback-item.negative {
+            border-left-color: #ef4444;
+        }
+        
+        .feedback-item.neutral {
+            border-left-color: #6b7280;
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .feedback-channel {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .support { background: #dbeafe; color: #1e40af; }
+        .twitter { background: #e0f2fe; color: #0369a1; }
+        .github { background: #f3e8ff; color: #7c3aed; }
+        .discord { background: #f0f9ff; color: #0ea5e9; }
+        .email { background: #ecfccb; color: #4d7c0f; }
+        
+        .sentiment {
+            font-size: 1.5rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        select, input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Feedback Fusion Dashboard</h1>
+            <p class="subtitle">Aggregated customer feedback from all channels</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-feedback">--</div>
+                <div class="stat-label">Total Feedback</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="positive-feedback">--</div>
+                <div class="stat-label">Positive</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="negative-feedback">--</div>
+                <div class="stat-label">Needs Attention</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="loadFeedback()">🔄 Refresh Data</button>
+            <select id="filter-channel" onchange="filterFeedback()">
+                <option value="all">All Channels</option>
+                <option value="Support Ticket">Support Ticket</option>
+                <option value="Twitter">Twitter</option>
+                <option value="GitHub">GitHub</option>
+                <option value="Discord">Discord</option>
+                <option value="Email">Email</option>
+            </select>
+            <select id="filter-sentiment" onchange="filterFeedback()">
+                <option value="all">All Sentiments</option>
+                <option value="positive">Positive 😊</option>
+                <option value="neutral">Neutral 😐</option>
+                <option value="negative">Negative 😠</option>
+            </select>
+            <input type="text" id="search" placeholder="Search feedback..." onkeyup="filterFeedback()">
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Recent Feedback</h2>
+                <div id="feedback-list">
+                    <p>Loading feedback data...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Channel Distribution</h2>
+                <canvas id="channelChart" width="400" height="300"></canvas>
+            </div>
+            
+            <div class="card">
+                <h2>Sentiment Analysis</h2>
+                <canvas id="sentimentChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        let allFeedback = [];
+        let channelChart, sentimentChart;
+        
+        // Load feedback data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeedback();
+        });
+        
+        async function loadFeedback() {
+            try {
+                const response = await fetch('/api/feedback');
+                const data = await response.json();
+                
+                allFeedback = data.feedback;
+                updateSummary(data.summary);
+                renderFeedback(allFeedback);
+                updateCharts(allFeedback);
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                document.getElementById('feedback-list').innerHTML = 
+                    '<p style="color: red;">Error loading data. Make sure the worker is running.</p>';
+            }
+        }
+        
+        function updateSummary(summary) {
+            document.getElementById('total-feedback').textContent = summary.total;
+            document.getElementById('positive-feedback').textContent = summary.positive;
+            document.getElementById('negative-feedback').textContent = summary.negative;
+        }
+        
+        function renderFeedback(feedback) {
+            const container = document.getElementById('feedback-list');
+            
+            if (feedback.length === 0) {
+                container.innerHTML = '<p>No feedback found with current filters.</p>';
+                return;
+            }
+            
+            container.innerHTML = feedback.map(item => `
+                <div class="feedback-item ${item.sentiment}">
+                    <div class="feedback-header">
+                        <span class="feedback-channel ${item.channel.toLowerCase().replace(' ', '')}">
+                            ${item.channel}
+                        </span>
+                        <span class="sentiment">
+                            ${item.sentiment === 'positive' ? '😊' : 
+                              item.sentiment === 'negative' ? '😠' : '😐'}
+                        </span>
+                    </div>
+                    <p><strong>${item.product}:</strong> ${item.text}</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        <span>${item.date}</span>
+                        <span>Urgency: <span style="color: ${item.urgency === 'high' ? 'red' : item.urgency === 'medium' ? 'orange' : 'green'}">
+                            ${item.urgency}
+                        </span></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function filterFeedback() {
+            const channel = document.getElementById('filter-channel').value;
+            const sentiment = document.getElementById('filter-sentiment').value;
+            const search = document.getElementById('search').value.toLowerCase();
+            
+            let filtered = allFeedback;
+            
+            if (channel !== 'all') {
+                filtered = filtered.filter(f => f.channel === channel);
+            }
+            
+            if (sentiment !== 'all') {
+                filtered = filtered.filter(f => f.sentiment === sentiment);
+            }
+            
+            if (search) {
+                filtered = filtered.filter(f => 
+                    f.text.toLowerCase().includes(search) || 
+                    f.product.toLowerCase().includes(search)
+                );
+            }
+            
+            renderFeedback(filtered);
+        }
+        
+        function updateCharts(feedback) {
+            // Channel distribution
+            const channels = ['Support Ticket', 'Twitter', 'GitHub', 'Discord', 'Email'];
+            const channelCounts = channels.map(channel => 
+                feedback.filter(f => f.channel === channel).length
+            );
+            
+            // Sentiment distribution
+            const sentiments = ['positive', 'neutral', 'negative'];
+            const sentimentCounts = sentiments.map(sentiment => 
+                feedback.filter(f => f.sentiment === sentiment).length
+            );
+            
+            // Destroy existing charts if they exist
+            if (channelChart) channelChart.destroy();
+            if (sentimentChart) sentimentChart.destroy();
+            
+            // Channel chart
+            const channelCtx = document.getElementById('channelChart').getContext('2d');
+            channelChart = new Chart(channelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: channels,
+                    datasets: [{
+                        data: channelCounts,
+                        backgroundColor: [
+                            '#3b82f6',  // blue
+                            '#06b6d4',  // cyan
+                            '#8b5cf6',  // purple
+                            '#ec4899',  // pink
+                            '#10b981'   // green
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Sentiment chart
+            const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+            sentimentChart = new Chart(sentimentCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Positive 😊', 'Neutral 😐', 'Negative 😠'],
+                    datasets: [{
+                        label: 'Feedback Count',
+                        data: sentimentCounts,
+                        backgroundColor: [
+                            '#10b981',  // green
+                            '#6b7280',  // gray
+                            '#ef4444'   // red
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
