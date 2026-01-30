@@ -1,0 +1,23 @@
+name = "feedback-dashboard"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Remove this entire triggers section or fix it:
+# triggers = { routes = [] }  # DELETE OR COMMENT THIS LINE
+
+# Instead, define routes like this (if you need them):
+# routes = [
+#   { pattern = "feedback-dashboard.yoursite.com", custom_domain = true }
+# ]
+
+# OR if you don't need routes, just leave it out
+
+account_id = "f9b5e5b5e64b4fabe5f271e2505d12ed"  # Your actual account ID
+
+# KV namespace
+kv_namespaces = [
+  { binding = "FEEDBACK_KV", id = "f7efbcbf7bbf464cbb8aa08cb005be5a" }
+]
+
+# Simple deployment settings
+workers_dev = true
